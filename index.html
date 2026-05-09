@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Travel Photo Map</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="map-stage" aria-label="Interactive world photo map">
+        <div class="map-wrap">
+          <svg class="world-map" viewBox="0 0 1000 520" role="img" aria-labelledby="mapTitle mapDesc">
+            <title id="mapTitle">Detailed world photo map</title>
+            <desc id="mapDesc">Major countries are labeled and clickable, opening photo galleries.</desc>
+
+            <g class="graticule" aria-hidden="true">
+              <path d="M0 91.67H1000M0 173.33H1000M0 255H1000M0 336.67H1000M0 418.33H1000"></path>
+              <path d="M166.67 10V500M333.33 10V500M500 10V500M666.67 10V500M833.33 10V500"></path>
+            </g>
+
+            <g class="countries" id="countryLayer"></g>
+          </svg>
+        </div>
+      </section>
+    </main>
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" hidden>
+      <div class="lightbox-backdrop" data-close></div>
+      <section class="lightbox-card">
+        <header class="lightbox-header">
+          <div>
+            <p class="panel-kicker" id="lightboxCountry">Gallery</p>
+            <h2 id="lightboxTitle">Country photos</h2>
+          </div>
+          <button class="icon-button" type="button" data-close aria-label="Close gallery" title="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <form class="upload-form" id="uploadForm">
+          <input id="photoTitle" name="title" type="text" maxlength="90" placeholder="Photo title" aria-label="Photo title">
+          <input id="photoFile" name="photo" type="file" accept="image/*" aria-label="Choose photo">
+          <button type="submit">Upload</button>
+          <p id="uploadStatus" role="status"></p>
+        </form>
+        <div class="gallery" id="gallery"></div>
+      </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/country-data.js"></script>
+    <script src="assets/photos.js"></script>
+    <script src="assets/supabase-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
