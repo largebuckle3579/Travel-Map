@@ -65,9 +65,20 @@ const uploadForm = document.querySelector("#uploadForm");
 const photoTitle = document.querySelector("#photoTitle");
 const photoFile = document.querySelector("#photoFile");
 const uploadStatus = document.querySelector("#uploadStatus");
+const slideshow = document.querySelector("#slideshow");
+const slideImage = document.querySelector("#slideImage");
+const slideCountry = document.querySelector("#slideCountry");
+const slideTitle = document.querySelector("#slideTitle");
+const slideCounter = document.querySelector("#slideCounter");
+const prevSlide = document.querySelector("#prevSlide");
+const nextSlide = document.querySelector("#nextSlide");
+const closeSlideshowButton = document.querySelector("#closeSlideshow");
 
 let countries = [];
 let currentCountry = null;
+let currentPhotos = [];
+let slideIndex = 0;
+let slideTimer = null;
 
 const supabaseConfig = window.SUPABASE_CONFIG || {};
 const hasSupabaseConfig = Boolean(supabaseConfig.url && supabaseConfig.anonKey && window.supabase);
@@ -183,7 +194,7 @@ function countryFromFeature(feature, index) {
   const id = slugify(name);
   const override = labelOverrides[name] ? project(labelOverrides[name]) : null;
   const stats = featureStats(feature);
-  const savedPhotos = window.COUNTRY_PHOTOS?.[id];
+  const savedPhotos = (window.COUNTRY_PHOTOS?.[id] || []).filter((photo) => photo.src);
 
   return {
     id,
@@ -194,11 +205,9 @@ function countryFromFeature(feature, index) {
     color: palette[index % palette.length],
     path: featureToPath(feature),
     note: `Add photos from ${displayName}, then click the country to see them here.`,
-    photos: savedPhotos || [
-      { title: `${displayName} photo 1`, src: "" },
-      { title: `${displayName} photo 2`, src: "" },
-      { title: `${displayName} photo 3`, src: "" }
-    ]
+    hasPhotos: savedPhotos.length > 0,
+    localPhotos: savedPhotos,
+    photos: savedPhotos
   };
 }
 
@@ -214,6 +223,34 @@ function safeFileName(fileName) {
     .replace(/(^-|-$)/g, "");
 }
 
+function updateCountryUnlockStates() {
+  countries.forEach((country) => {
+    document.querySelectorAll(`.country-group[data-country="${country.id}"]`).forEach((group) => {
+      group.classList.toggle("is-locked", !country.hasPhotos);
+    });
+  });
+}
+
+async function loadUnlockedCountries() {
+  if (!supabaseClient) {
+    updateCountryUnlockStates();
+    return;
+  }
+
+  const { data, error } = await supabaseClient.from("country_photos").select("country_id");
+  if (error) {
+    console.warn("Could not load unlocked countries", error);
+    updateCountryUnlockStates();
+    return;
+  }
+
+  const unlocked = new Set(data.map((photo) => photo.country_id));
+  countries.forEach((country) => {
+    country.hasPhotos = country.hasPhotos || unlocked.has(country.id);
+  });
+  updateCountryUnlockStates();
+}
+
 function renderMap() {
   const features = window.COUNTRY_GEOJSON.features
     .filter((feature) => feature.properties.name !== "Antarctica")
@@ -222,7 +259,13 @@ function renderMap() {
   countries = features.map(countryFromFeature);
 
   countries.forEach((country) => {
-    const group = createSvgElement("g", { tabindex: "0", role: "button", "aria-label": `Open ${country.displayName} photos` });
+    const group = createSvgElement("g", {
+      tabindex: "0",
+      role: "button",
+      class: `country-group${country.hasPhotos ? "" : " is-locked"}`,
+      "data-country": country.id,
+      "aria-label": `Open ${country.displayName} photos`
+    });
     const path = createSvgElement("path", {
       d: country.path,
       class: "country-hit",
@@ -277,11 +320,20 @@ function selectCountry(country) {
   });
 }
 
-function openCountry(countryId) {
+async function openCountry(countryId) {
   const country = countries.find((item) => item.id === countryId);
   if (!country) return;
   selectCountry(country);
-  showGallery(country);
+  const photos = await loadOnlinePhotos(country);
+  country.photos = photos;
+  country.hasPhotos = photos.length > 0;
+  updateCountryUnlockStates();
+
+  if (photos.length) {
+    startSlideshow(country, photos);
+  } else {
+    showPhotoManager(country, photos);
+  }
 }
 
 function renderGallery(country, photos) {
@@ -304,28 +356,71 @@ async function loadOnlinePhotos(country) {
     return country.photos;
   }
 
-  return data.map((photo) => ({
+  const onlinePhotos = data.map((photo) => ({
     title: photo.title,
     src: photo.image_url
   }));
+
+  return [...onlinePhotos, ...country.localPhotos];
 }
 
-async function showGallery(country) {
+function updateSlide() {
+  const photo = currentPhotos[slideIndex];
+  if (!photo) return;
+
+  slideImage.src = photo.src;
+  slideImage.alt = photo.title || `${currentCountry.displayName} photo ${slideIndex + 1}`;
+  slideCountry.textContent = currentCountry.displayName;
+  slideTitle.textContent = photo.title || `${currentCountry.displayName} photo`;
+  slideCounter.textContent = `${slideIndex + 1} / ${currentPhotos.length}`;
+}
+
+function scheduleSlideAdvance() {
+  window.clearInterval(slideTimer);
+  if (currentPhotos.length > 1) {
+    slideTimer = window.setInterval(() => {
+      slideIndex = (slideIndex + 1) % currentPhotos.length;
+      updateSlide();
+    }, 4500);
+  }
+}
+
+function startSlideshow(country, photos) {
+  currentCountry = country;
+  currentPhotos = photos;
+  slideIndex = 0;
+  lightbox.hidden = true;
+  slideshow.hidden = false;
+  updateSlide();
+  scheduleSlideAdvance();
+  closeSlideshowButton.focus();
+}
+
+function closeSlideshow(openManager = true) {
+  window.clearInterval(slideTimer);
+  slideshow.hidden = true;
+  if (openManager && currentCountry) {
+    showPhotoManager(currentCountry, currentPhotos);
+  }
+}
+
+function showPhotoManager(country, photos = country.photos) {
   currentCountry = country;
   lightboxCountry.textContent = country.displayName;
-  lightboxTitle.textContent = `${country.displayName} photos`;
+  lightboxTitle.textContent = photos.length ? `${country.displayName} photos` : `Unlock ${country.displayName}`;
   photoTitle.value = "";
   photoFile.value = "";
   lightbox.hidden = false;
-  renderGallery(country, country.photos);
-  setUploadStatus(hasSupabaseConfig ? "Loading saved photos..." : "Supabase is not connected yet. Add your URL and anon key in assets/supabase-config.js.", hasSupabaseConfig ? "" : "error");
-  lightbox.querySelector("[data-close]").focus();
-
-  const photos = await loadOnlinePhotos(country);
   renderGallery(country, photos);
-  if (hasSupabaseConfig) {
-    setUploadStatus(photos.length ? `${photos.length} saved photo${photos.length === 1 ? "" : "s"} loaded.` : "No saved photos yet. Upload one.", "");
-  }
+  setUploadStatus(
+    hasSupabaseConfig
+      ? photos.length
+        ? "Add more photos to this country."
+        : "No photos yet. Upload one to unlock this country."
+      : "Supabase is not connected yet. Add your URL and anon key in assets/supabase-config.js.",
+    hasSupabaseConfig ? "" : "error"
+  );
+  lightbox.querySelector("[data-close]").focus();
 }
 
 function closeGallery() {
@@ -337,9 +432,35 @@ document.querySelectorAll("[data-close]").forEach((button) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !lightbox.hidden) {
+  if (event.key === "Escape" && !slideshow.hidden) {
+    closeSlideshow(true);
+  } else if (event.key === "Escape" && !lightbox.hidden) {
     closeGallery();
+  } else if (event.key === "ArrowRight" && !slideshow.hidden && currentPhotos.length > 1) {
+    slideIndex = (slideIndex + 1) % currentPhotos.length;
+    updateSlide();
+    scheduleSlideAdvance();
+  } else if (event.key === "ArrowLeft" && !slideshow.hidden && currentPhotos.length > 1) {
+    slideIndex = (slideIndex - 1 + currentPhotos.length) % currentPhotos.length;
+    updateSlide();
+    scheduleSlideAdvance();
   }
+});
+
+closeSlideshowButton.addEventListener("click", () => closeSlideshow(true));
+
+nextSlide.addEventListener("click", () => {
+  if (!currentPhotos.length) return;
+  slideIndex = (slideIndex + 1) % currentPhotos.length;
+  updateSlide();
+  scheduleSlideAdvance();
+});
+
+prevSlide.addEventListener("click", () => {
+  if (!currentPhotos.length) return;
+  slideIndex = (slideIndex - 1 + currentPhotos.length) % currentPhotos.length;
+  updateSlide();
+  scheduleSlideAdvance();
 });
 
 uploadForm.addEventListener("submit", async (event) => {
@@ -399,8 +520,14 @@ uploadForm.addEventListener("submit", async (event) => {
 
   photoTitle.value = "";
   photoFile.value = "";
-  setUploadStatus("Saved online.");
-  renderGallery(currentCountry, await loadOnlinePhotos(currentCountry));
+  const updatedPhotos = await loadOnlinePhotos(currentCountry);
+  currentCountry.photos = updatedPhotos;
+  currentCountry.hasPhotos = updatedPhotos.length > 0;
+  currentPhotos = updatedPhotos;
+  updateCountryUnlockStates();
+  setUploadStatus("Saved online. This country is unlocked.");
+  renderGallery(currentCountry, updatedPhotos);
 });
 
 renderMap();
+loadUnlockedCountries();

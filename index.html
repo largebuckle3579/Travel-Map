@@ -25,15 +25,32 @@
       </section>
     </main>
 
+    <div class="slideshow" id="slideshow" role="dialog" aria-modal="true" aria-labelledby="slideCountry" hidden>
+      <img id="slideImage" alt="">
+      <div class="slide-shade"></div>
+      <header class="slide-header">
+        <div>
+          <p class="panel-kicker" id="slideCountry">Country</p>
+          <h2 id="slideTitle">Photo</h2>
+          <p id="slideCounter"></p>
+        </div>
+        <button class="icon-button glass-button" type="button" id="closeSlideshow" aria-label="Exit slideshow" title="Exit">
+          <span aria-hidden="true">×</span>
+        </button>
+      </header>
+      <button class="slide-nav slide-prev" type="button" id="prevSlide" aria-label="Previous photo">‹</button>
+      <button class="slide-nav slide-next" type="button" id="nextSlide" aria-label="Next photo">›</button>
+    </div>
+
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" hidden>
       <div class="lightbox-backdrop" data-close></div>
       <section class="lightbox-card">
         <header class="lightbox-header">
           <div>
-            <p class="panel-kicker" id="lightboxCountry">Gallery</p>
+            <p class="panel-kicker" id="lightboxCountry">Add photos</p>
             <h2 id="lightboxTitle">Country photos</h2>
           </div>
-          <button class="icon-button" type="button" data-close aria-label="Close gallery" title="Close">
+          <button class="icon-button" type="button" data-close aria-label="Close photo manager" title="Close">
             <span aria-hidden="true">×</span>
           </button>
         </header>
