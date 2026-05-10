@@ -393,12 +393,34 @@ function startSlideshow(country, photos) {
   slideshow.hidden = false;
   updateSlide();
   scheduleSlideAdvance();
+  enterFullscreen();
   closeSlideshowButton.focus();
 }
 
-function closeSlideshow(openManager = true) {
+async function enterFullscreen() {
+  if (document.fullscreenElement || !slideshow.requestFullscreen) return;
+
+  try {
+    await slideshow.requestFullscreen();
+  } catch (error) {
+    console.warn("Fullscreen request was not allowed", error);
+  }
+}
+
+async function exitFullscreen() {
+  if (!document.fullscreenElement || !document.exitFullscreen) return;
+
+  try {
+    await document.exitFullscreen();
+  } catch (error) {
+    console.warn("Fullscreen exit failed", error);
+  }
+}
+
+async function closeSlideshow(openManager = true) {
   window.clearInterval(slideTimer);
   slideshow.hidden = true;
+  await exitFullscreen();
   if (openManager && currentCountry) {
     showPhotoManager(currentCountry, currentPhotos);
   }
