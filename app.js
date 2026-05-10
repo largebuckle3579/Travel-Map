@@ -422,7 +422,7 @@ function scheduleSlideAdvance() {
     slideTimer = window.setInterval(() => {
       slideIndex = (slideIndex + 1) % currentPhotos.length;
       updateSlide();
-    }, 4500);
+    }, 9000);
   }
 }
 

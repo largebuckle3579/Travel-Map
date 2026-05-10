@@ -4,7 +4,7 @@
   --map-bg: #efe4d1;
   --panel: #ffffff;
   --panel-strong: #f7f1e7;
-  --text: #f7f2e8;
+  --text: #211914;
   --muted: #5f655f;
   --line: rgba(247, 242, 232, 0.16);
   --accent: #d2703f;
@@ -339,7 +339,7 @@ h2 {
 .lightbox-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(24, 22, 18, 0.36);
+  background: rgba(42, 35, 26, 0.48);
   backdrop-filter: blur(10px);
 }
 
@@ -351,7 +351,8 @@ h2 {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 18px 18px 8px 8px;
-  background: var(--panel);
+  background: #f2e8d9;
+  color: #211914;
   box-shadow: var(--shadow);
 }
 
@@ -364,7 +365,7 @@ h2 {
   gap: 20px;
   padding: 18px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.94);
+  background: #e3d4bf;
   backdrop-filter: blur(16px);
 }
 
@@ -374,7 +375,7 @@ h2 {
   gap: 10px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
-  background: #fffaf1;
+  background: #eadbc7;
 }
 
 .upload-form input,
@@ -382,7 +383,7 @@ h2 {
   min-height: 42px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #ffffff;
+  background: #fffaf2;
   color: var(--text);
 }
 
@@ -412,7 +413,7 @@ h2 {
 .upload-form p {
   grid-column: 1 / -1;
   margin: 0;
-  color: var(--muted);
+  color: #4a453f;
   font-size: 0.9rem;
 }
 
@@ -452,8 +453,8 @@ h2 {
   padding: 28px;
   border: 1px dashed var(--line);
   border-radius: 8px;
-  color: var(--muted);
-  background: #fffaf1;
+  color: #4a453f;
+  background: #eadbc7;
   text-align: center;
 }
 
