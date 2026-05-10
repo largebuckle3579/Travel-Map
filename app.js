@@ -255,7 +255,7 @@ function ensureFlagPattern(country) {
 }
 
 function fillForCountry(country) {
-  if (!country.hasPhotos) return "";
+  if (!country.hasPhotos) return "url(#lockedTexture)";
   ensureFlagPattern(country);
   return country.iso2 ? `url(#${flagPatternId(country)})` : country.color;
 }
