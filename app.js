@@ -57,6 +57,7 @@ const displayNames = {
 };
 
 const countryLayer = document.querySelector("#countryLayer");
+const flagPatternLayer = document.querySelector("#flagPatternLayer");
 const lightbox = document.querySelector("#lightbox");
 const lightboxCountry = document.querySelector("#lightboxCountry");
 const lightboxTitle = document.querySelector("#lightboxTitle");
@@ -193,6 +194,7 @@ function countryFromFeature(feature, index) {
   const name = feature.properties.name;
   const displayName = displayNames[name] || name;
   const id = slugify(name);
+  const iso2 = feature.properties["ISO3166-1-Alpha-2"];
   const override = labelOverrides[name] ? project(labelOverrides[name]) : null;
   const stats = featureStats(feature);
   const savedPhotos = (window.COUNTRY_PHOTOS?.[id] || []).filter((photo) => photo.src);
@@ -200,6 +202,7 @@ function countryFromFeature(feature, index) {
   return {
     id,
     name,
+    iso2,
     displayName,
     area: stats.area,
     center: override || stats.center,
@@ -224,10 +227,47 @@ function safeFileName(fileName) {
     .replace(/(^-|-$)/g, "");
 }
 
+function flagPatternId(country) {
+  return `flag-${country.id}`;
+}
+
+function ensureFlagPattern(country) {
+  if (!country.iso2 || flagPatternLayer.querySelector(`#${flagPatternId(country)}`)) return;
+
+  const pattern = createSvgElement("pattern", {
+    id: flagPatternId(country),
+    width: "1",
+    height: "1",
+    patternUnits: "objectBoundingBox",
+    patternContentUnits: "objectBoundingBox"
+  });
+  const image = createSvgElement("image", {
+    href: `https://flagcdn.com/w640/${country.iso2.toLowerCase()}.png`,
+    x: "0",
+    y: "0",
+    width: "1",
+    height: "1",
+    preserveAspectRatio: "xMidYMid slice"
+  });
+
+  pattern.append(image);
+  flagPatternLayer.append(pattern);
+}
+
+function fillForCountry(country) {
+  if (!country.hasPhotos) return "";
+  ensureFlagPattern(country);
+  return country.iso2 ? `url(#${flagPatternId(country)})` : country.color;
+}
+
 function updateCountryUnlockStates() {
   countries.forEach((country) => {
     document.querySelectorAll(`.country-group[data-country="${country.id}"]`).forEach((group) => {
       group.classList.toggle("is-locked", !country.hasPhotos);
+      const path = group.querySelector(".country-hit");
+      if (path) {
+        path.setAttribute("fill", fillForCountry(country));
+      }
     });
   });
 }

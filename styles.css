@@ -1,12 +1,12 @@
 :root {
-  color-scheme: light;
-  --page: #ece7dc;
-  --map-bg: #fffaf0;
+  color-scheme: dark;
+  --page: #080d10;
+  --map-bg: #0c1519;
   --panel: #ffffff;
   --panel-strong: #f7f1e7;
-  --text: #171717;
+  --text: #f7f2e8;
   --muted: #5f655f;
-  --line: rgba(23, 23, 23, 0.14);
+  --line: rgba(247, 242, 232, 0.16);
   --accent: #d2703f;
   --accent-2: #24786f;
   --shadow: 0 22px 65px rgba(45, 40, 30, 0.18);
@@ -26,8 +26,9 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   overflow: hidden;
   background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.9), transparent 34%),
-    linear-gradient(135deg, #e8dfd1, #fbf7ef 46%, #ded7cc);
+    radial-gradient(circle at 18% 16%, rgba(37, 120, 111, 0.28), transparent 32%),
+    radial-gradient(circle at 82% 72%, rgba(210, 112, 63, 0.16), transparent 30%),
+    linear-gradient(135deg, #05080a, #0b1418 48%, #10110f);
   color: var(--text);
 }
 
@@ -47,11 +48,12 @@ button {
   border: 0;
   border-radius: 0;
   background:
-    linear-gradient(rgba(124, 143, 146, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 143, 146, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.08), transparent 48%),
+    linear-gradient(rgba(194, 220, 218, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(194, 220, 218, 0.04) 1px, transparent 1px),
     var(--map-bg);
-  background-size: 92px 92px;
-  box-shadow: inset 0 0 80px rgba(83, 75, 61, 0.12);
+  background-size: auto, 92px 92px, 92px 92px, auto;
+  box-shadow: inset 0 0 110px rgba(0, 0, 0, 0.5);
 }
 
 .map-fullscreen-button {
@@ -65,8 +67,8 @@ button {
   place-items: center;
   border: 1px solid rgba(23, 23, 23, 0.14);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: #171717;
+  background: rgba(8, 13, 16, 0.62);
+  color: #f7f2e8;
   cursor: pointer;
   font-size: 1.2rem;
   box-shadow: 0 14px 36px rgba(83, 75, 61, 0.14);
@@ -75,7 +77,7 @@ button {
 
 .map-fullscreen-button:hover,
 .map-fullscreen-button:focus-visible {
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(8, 13, 16, 0.88);
   outline: none;
 }
 
@@ -164,13 +166,13 @@ h2 {
 
 .graticule path {
   fill: none;
-  stroke: rgba(40, 77, 91, 0.08);
+  stroke: rgba(216, 231, 229, 0.08);
   stroke-width: 1;
 }
 
 .country-hit {
-  stroke: #ffffff;
-  stroke-width: 0.65;
+  stroke: rgba(244, 240, 232, 0.72);
+  stroke-width: 0.58;
   cursor: pointer;
   transition: filter 160ms ease, opacity 160ms ease, transform 160ms ease, stroke 160ms ease;
   transform-box: fill-box;
@@ -179,34 +181,34 @@ h2 {
 
 .country-hit:hover,
 .country-hit:focus {
-  filter: drop-shadow(0 4px 10px rgba(25, 25, 25, 0.22));
-  stroke: #242424;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.28));
+  stroke: #ffffff;
   stroke-width: 1.1;
   outline: none;
   transform: scale(1.035);
 }
 
 .country-hit.is-selected {
-  fill: #54c7ba;
-  stroke: #111111;
-  stroke-width: 1.2;
-  filter: drop-shadow(0 5px 12px rgba(36, 120, 111, 0.38));
+  stroke: #ffffff;
+  stroke-width: 1.35;
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.4));
 }
 
 .country-group.is-locked .country-hit {
-  fill: #d8d2c7;
-  opacity: 0.42;
-  stroke: rgba(255, 255, 255, 0.7);
+  fill: #141a1e;
+  opacity: 0.92;
+  stroke: rgba(255, 255, 255, 0.1);
 }
 
 .country-group.is-locked .country-label {
-  fill: #6f6b63;
-  opacity: 0.48;
+  fill: #7d8587;
+  opacity: 0.28;
+  stroke: rgba(5, 8, 10, 0.7);
 }
 
 .country-group.is-locked:hover .country-hit {
-  opacity: 0.72;
-  filter: drop-shadow(0 5px 10px rgba(80, 72, 58, 0.16));
+  opacity: 1;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.12));
 }
 
 .country-label-hit {
@@ -216,15 +218,19 @@ h2 {
 }
 
 .country-label {
-  fill: #111111;
+  fill: #ffffff;
   font-weight: 900;
   cursor: pointer;
   pointer-events: auto;
   text-anchor: middle;
   dominant-baseline: middle;
   paint-order: stroke;
-  stroke: rgba(255, 255, 255, 0.76);
-  stroke-width: 2.4px;
+  stroke: rgba(0, 0, 0, 0.78);
+  stroke-width: 2.8px;
+}
+
+.country-group:not(.is-locked) .country-hit {
+  filter: saturate(1.08) contrast(1.04) drop-shadow(0 7px 14px rgba(0, 0, 0, 0.18));
 }
 
 .slideshow {
