@@ -65,6 +65,7 @@ const uploadForm = document.querySelector("#uploadForm");
 const photoTitle = document.querySelector("#photoTitle");
 const photoFile = document.querySelector("#photoFile");
 const uploadStatus = document.querySelector("#uploadStatus");
+const mapFullscreenButton = document.querySelector("#mapFullscreenButton");
 const slideshow = document.querySelector("#slideshow");
 const slideImage = document.querySelector("#slideImage");
 const slideCountry = document.querySelector("#slideCountry");
@@ -397,6 +398,16 @@ function startSlideshow(country, photos) {
   closeSlideshowButton.focus();
 }
 
+async function enterAppFullscreen() {
+  if (document.fullscreenElement || !document.documentElement.requestFullscreen) return;
+
+  try {
+    await document.documentElement.requestFullscreen();
+  } catch (error) {
+    console.warn("Fullscreen request was not allowed", error);
+  }
+}
+
 async function enterFullscreen() {
   if (document.fullscreenElement || !slideshow.requestFullscreen) return;
 
@@ -484,6 +495,8 @@ prevSlide.addEventListener("click", () => {
   updateSlide();
   scheduleSlideAdvance();
 });
+
+mapFullscreenButton.addEventListener("click", enterAppFullscreen);
 
 uploadForm.addEventListener("submit", async (event) => {
   event.preventDefault();
